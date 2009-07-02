@@ -1,0 +1,58 @@
+Notes about the GtkDrop widget
+
+Copyright (C) 2008 Gaute Hope <eg@gaute.vetsj.com>
+
+GtkDrop is a widget I created when I wanted to create a popup calendar controlled by a toggle button, and as the example program shows it is ideal for this. You can use the GtkDrop widget as any other container as it derives from GtkWindow. And when you have set some options for how to calculate its position (see 'Positioning' further down) the widget will take care of most things itself.
+
+When you click anywhere on the parentwindow the widget will be hidden, and when you move the parentwindow the position will be recalculated. You could easily change this behaviour to hiding the widget on moved parent window by editing 'gtkdrop.c' and the function 'gtk_drop_parent_moved' and change the line 'gtk_drop_refresh_position' with 'gtk_drop_hide'. If this widget ever gets interesting I plan to make this functionality automatic through a configuration setting.
+
+Tip:
+It might look nicer if you place all your widget inside a GtkFrame.
+
+Building:
+I set up a scons build environment for the test program, just run 'scons' in the source directory.
+
+Usage:
+Include 'gtkdrop.h', see 'test.c' for an example.
+
+GtkDrop is using the normal gtk+ libraries, you get all needed compile arguments as normal by running: 'pkg-config --cflags --libs gtk+-2.0'.
+
+Design notes:
+
+Initializing:
+Set up your window, in this example 'main_window'.
+Create the widget:
+
+  /* GtkDrop relies on the parent_window being able to move or close on events from this window */
+  
+  GtkWidget * drop = gtk_drop_new (main_window);
+  
+  /* This is set to GTK_DROP_ALIGN_DOWN by default and decides on what side of the position widget the widget will appear */
+  
+  gtk_drop_set_align (drop, GTK_DROP_ALIGN_RIGHT);
+  
+  /* This widget is used to calculate where the widget will appear, and it will be on one of the sides depending on the specified align */
+  
+  gtk_drop_set_position_widget (drop, for_instance_an_toggle_button);
+  
+  /* This is the margin from the position widget to the GtkDrop widget */
+  
+  gtk_drop_set_margin (drop, 5);
+
+
+Signals:
+
+GtkDrop emits the following signals:
+  'drop-shown' - when the widget is shown
+  'drop-hidden' - when the widget is hidden
+
+
+Positioning:
+The positioning of the GtkDrop widget can be calculated automatically by setting a 'position widget'. This is done with the function 'gtk_drop_set_position_widget', if the widget is allready shown you need to manually call 'gtk_drop_refresh_position' to recalculate the position (unless some event triggers it). This because in many cases the 'position widget' will not yet have been shown and does not yet have a GdkWindow associated with it.
+
+You can manually calculate the position of the widget by assigning your own calculate function to GtkDrop with the 'gtk_drop_set_position_function'. 
+
+The functions '*position_function' and '*position_widget' disables each other.
+
+- gaute
+
