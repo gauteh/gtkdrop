@@ -40,7 +40,7 @@ typedef enum {
 	GTK_DROP_ALIGN_DOWN,
 	GTK_DROP_ALIGN_RIGHT,
 	GTK_DROP_ALIGN_LEFT
-	
+
 } GtkDropAlign;
 
 struct _GtkDrop
@@ -57,26 +57,27 @@ struct _GtkDrop
 	GtkAllocation *allocation;
 	GtkAllocation *parentalloc;
 
-	
+
 	void (*calculate_position)	(GtkDrop*, gint *, gint *);
 };
 
 struct _GtkDropClass
 {
   GtkWindowClass parent_class;
-  
+
   void (* gtkdrop) (GtkDrop *drop);
 };
 
 guint       gtk_drop_get_type        		  (void);
-GtkWidget*  gtk_drop_new             		  (GtkWindow *);
+GtkWidget*  gtk_drop_new             		  ();
 void	      gtk_drop_show           		  (GtkDrop *drop);
 void				gtk_drop_hide						      (GtkDrop *drop);
 void				gtk_drop_set_position_widget 	(GtkDrop *drop, GtkWidget *widget);
+void        gtk_drop_set_parent_window (GtkDrop *drop, GtkWindow *parent_window);
 void 				gtk_drop_set_position_function (GtkDrop *drop, void (*calc_func));
 void				gtk_drop_refresh_position		  (GtkDrop *drop);
 void				gtk_drop_set_align				    (GtkDrop *drop, GtkDropAlign align);
 
- 
+
 # endif
 

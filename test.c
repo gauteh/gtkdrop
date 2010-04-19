@@ -48,13 +48,13 @@ int main (int argc, char ** argv)
   printf ("Test program for the GtkDrop widget\n");
 	printf ("Copyright (C) 2008 Gaute Hope <eg@gaute.vetsj.com>\n");
 
+  /* {{{ Set up test window and toggle button --- */
   gtk_init (&argc, &argv);
-  	
   test = (TestDrop*) malloc (sizeof (TestDrop));
 
   GtkWidget *w = GTK_WIDGET(gtk_window_new (GTK_WINDOW_TOPLEVEL));
   test->win = GTK_WINDOW(w);
-  	
+
   gtk_widget_show (GTK_WIDGET(test->win));
   gtk_window_set_resizable (GTK_WINDOW (test->win), FALSE);
   gtk_window_set_title (GTK_WINDOW (test->win), "GtkDrop test");
@@ -66,7 +66,7 @@ int main (int argc, char ** argv)
   g_signal_connect (G_OBJECT (button), "toggled", G_CALLBACK (button_toggled), NULL);
   test->button = button;
 
-	GtkWidget *button_label = gtk_label_new ("Toggle");	
+	GtkWidget *button_label = gtk_label_new ("Toggle");
 
   GtkWidget *hbox = gtk_hbox_new (FALSE, 5);
   gtk_box_pack_start (GTK_BOX (hbox), button_label, FALSE, FALSE, 5);
@@ -80,50 +80,64 @@ int main (int argc, char ** argv)
   gtk_box_pack_start (GTK_BOX (mhbox), button, FALSE, FALSE, 50);
   gtk_box_pack_start (GTK_BOX (mvbox), mhbox, FALSE, FALSE, 50);
  	gtk_container_add (GTK_CONTAINER (w), mvbox);
+  /* End setting up test window }}} */
 
- 	GtkWidget *drop = gtk_drop_new (GTK_WINDOW(w));
+  /* Set up GtkDrop */
+
+  /* We have to either use gtk_drop_position_widget ()
+   * _or_ gtk_drop_set_parent () for GtkDrop to know
+   * which GtkWindow to look for events on and be
+   * transient for */
+
+  GtkWidget *drop = gtk_drop_new ();
  	test->drop = GTK_DROP (drop);
+
+  /* It will be positioned relative to the toggle button; test->button 
+   * 
+   * The alternative is to make your own function that returns the
+   * position for the GtkDrop window; specify it with
+   * gtk_drop_set_position_function (). Make sure you also call
+   * gtk_drop_set_parent () with the window it will be transient for.
+   */
  	gtk_drop_set_position_widget (test->drop, button);
  	gtk_drop_set_align (test->drop, GTK_DROP_ALIGN_UP);
- 	
+
  	g_signal_connect (G_OBJECT (drop), "drop-hidden", G_CALLBACK (drop_hidden), NULL);
-  	  	
+
+  /* Add some widgets to the GtkDrop window/container */
  	GtkFrame *frame = GTK_FRAME (gtk_frame_new (NULL));
  	gtk_container_add (GTK_CONTAINER (drop), GTK_WIDGET (frame));
  	gtk_widget_show (GTK_WIDGET (frame));
-  	
+
   GtkWidget *e_hbox = gtk_hbox_new (FALSE, 5);
-  
+
  	GtkWidget *l = gtk_label_new ("Test label:");
  	gtk_box_pack_start (GTK_BOX (e_hbox), l, FALSE, FALSE, 5);
- 	
+
  	GtkWidget *e = gtk_entry_new ();
  	gtk_box_pack_start (GTK_BOX (e_hbox), e, FALSE, FALSE, 5);
- 	
+
  	GtkWidget *b = gtk_button_new_with_label ("Test");
  	gtk_box_pack_start (GTK_BOX (e_hbox), b, FALSE, FALSE, 5);
- 	
- 	
+
  	gtk_container_add (GTK_CONTAINER (frame), e_hbox);
- 	
  	gtk_widget_show_all (e_hbox);
-  	
+
+  /* Show test window */
  	gtk_widget_show_all (w);
 
+  /* Run program */
  	gtk_main ();
  	return 0;
 }
 
-void calc_drop_pos (int *x, int *y)
-{
-	
-}
-
+/* Callback to run when GtkDrop is hidden: reset toggle button */
 gboolean drop_hidden (GtkWidget *w, GdkEvent *e, gpointer *data)
 {
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (test->button), FALSE);
 }
 
+/* Toggle button pushed, show/hide GtkDrop */
 gboolean button_toggled (GtkWidget *w, GdkEvent *e, gpointer *data)
 {
 	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (w))) {
@@ -133,6 +147,7 @@ gboolean button_toggled (GtkWidget *w, GdkEvent *e, gpointer *data)
 	}
 }
 
+/* Exit Test program when ESC is pressed */
 gboolean key_pressed (GtkWidget *w, GdkEventKey *e, gpointer *data)
 {
   if (e->type == GDK_KEY_PRESS) {
@@ -143,6 +158,7 @@ gboolean key_pressed (GtkWidget *w, GdkEventKey *e, gpointer *data)
   return TRUE;
 }
 
+/* Quit program and clean up */
 gboolean quit (GtkWidget *w, GdkEvent *e, gpointer *data)
 {
   gtk_main_quit ();
